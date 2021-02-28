@@ -1,6 +1,11 @@
+# data and plots
+DATA/
+*.csv
+*.pdf
+
 # pycharm
 .idea
-DATA
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
