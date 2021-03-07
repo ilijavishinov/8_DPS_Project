@@ -1,5 +1,5 @@
 #%%
-from comet_ml import Experiment
+from comet_ml import Experiment, OfflineExperiment
 import pickle
 import numpy as np
 import pandas as pd
@@ -38,12 +38,12 @@ for SEGMENTS_LENGTH in [3, 4, 5, 6]:
             'C':      (1e-6, 1e+6, 'log-uniform'),
             'gamma':  (1e-6, 1e+1, 'log-uniform'),
             'coef0': (0.0, 10.0, 'uniform'),
-            'degree': (1, 8),
+            'degree': (1, 3),
             'kernel': ['linear', 'poly', 'rbf'],
             'random_state': [42]
             
         },
-        n_iter=500,
+        n_iter=50,
         cv=5,
         verbose = 10,
         n_jobs = 2,
@@ -51,24 +51,27 @@ for SEGMENTS_LENGTH in [3, 4, 5, 6]:
         scoring = 'accuracy',
     )
 
-    hyperparameters_optimizer.fit(X_train, y_train)
+    checkpoint_callback = skopt.callbacks.CheckpointSaver(f'D:\\FINKI\\8_dps\\Project\\MODELS\\skopt_checkpoints\\{EXPERIMENT_ID}.pkl')
+    hyperparameters_optimizer.fit(X_train, y_train, callback = [checkpoint_callback])
     skopt.dump(hyperparameters_optimizer, f'saved_models\\{EXPERIMENT_ID}.pkl')
 
     y_pred = hyperparameters_optimizer.best_estimator_.predict(X_test)
 
     for i in range(len(hyperparameters_optimizer.cv_results_['params'])):
-        exp = Experiment(
-                api_key = 'A8Lg71j9LtIrsv0deBA0DVGcR',
-                project_name = ALGORITHM,
-                workspace = "8_dps",
-                auto_output_logging = 'native',
-            )
-        exp.set_name(f'{EXPERIMENT_ID}_{i+1}')
-        exp.add_tags([DS, SEGMENTS_LENGTH,])
+        exp = OfflineExperiment(
+            api_key = 'A8Lg71j9LtIrsv0deBA0DVGcR',
+            project_name = ALGORITHM,
+            workspace = "8_dps",
+            auto_output_logging = 'native',
+            offline_directory = f'D:\\FINKI\\8_dps\\Project\\MODELS\\comet_ml_offline_experiments\\{EXPERIMENT_ID}'
+        )
+        exp.set_name(f'{EXPERIMENT_ID}_{i + 1}')
+        exp.add_tags([DS, SEGMENTS_LENGTH, ])
         for k, v in hyperparameters_optimizer.cv_results_.items():
             if k == "params": exp.log_parameters(dict(v[i]))
             else: exp.log_metric(k, v[i])
         exp.end()
+
         
         
         

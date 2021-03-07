@@ -1,5 +1,6 @@
 #%%
-from comet_ml import Experiment
+#%%
+from comet_ml import Experiment, OfflineExperiment
 import pickle
 import numpy as np
 import pandas as pd
@@ -18,7 +19,7 @@ DS = 'DS1'
 
 #%%
 
-for SEGMENTS_LENGTH in [7, 8, 9, 10]:
+for SEGMENTS_LENGTH in [10]:
 
     EXPERIMENT_ID = F'BayesSearch_{ALGORITHM}_{DS}_{SEGMENTS_LENGTH}s'
 
@@ -39,8 +40,9 @@ for SEGMENTS_LENGTH in [7, 8, 9, 10]:
             'weights': ['distance', 'uniform'],
             'p': (1,5),
             'metric': ['minkowski'],
+            'n_jobs': [2],
         },
-        n_iter=500,
+        n_iter=100,
         cv=5,
         verbose = 10,
         n_jobs = 2,
@@ -49,7 +51,8 @@ for SEGMENTS_LENGTH in [7, 8, 9, 10]:
         random_state = 42
     )
 
-    hyperparameters_optimizer.fit(X_train, y_train)
+    checkpoint_callback = skopt.callbacks.CheckpointSaver(f'D:\\FINKI\\8_dps\\Project\\MODELS\\skopt_checkpoints\\{EXPERIMENT_ID}.pkl')
+    hyperparameters_optimizer.fit(X_train, y_train, callback = [checkpoint_callback])
     skopt.dump(hyperparameters_optimizer, f'saved_models\\{EXPERIMENT_ID}.pkl')
 
     y_pred = hyperparameters_optimizer.best_estimator_.predict(X_test)
@@ -67,3 +70,9 @@ for SEGMENTS_LENGTH in [7, 8, 9, 10]:
             if k == "params": exp.log_parameters(dict(v[i]))
             else: exp.log_metric(k, v[i])
         exp.end()
+
+
+
+#%%
+
+

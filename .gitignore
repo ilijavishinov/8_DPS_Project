@@ -1,3 +1,8 @@
+MODELS/comet_ml_offline_experiments
+kasha_popara
+skopt_checkpoints
+saved_models
+
 # data and plots
 DATA/
 *.csv
