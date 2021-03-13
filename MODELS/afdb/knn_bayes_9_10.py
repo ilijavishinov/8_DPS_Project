@@ -42,11 +42,11 @@ def testing_metrics(y_test: np.ndarray, y_pred: np.ndarray):
     )
 
 ALGORITHM = 'KNN'
-DS = 'DS1'
+DS = 'DS2'
 
 #%%
 
-for SEGMENTS_LENGTH in [3, 4]:
+for SEGMENTS_LENGTH in [9, 10]:
 
     EXPERIMENT_ID = F'BayesSearch_{ALGORITHM}_{DS}_{SEGMENTS_LENGTH}s'
 
@@ -69,8 +69,8 @@ for SEGMENTS_LENGTH in [3, 4]:
             'metric': ['minkowski'],
             'n_jobs': [2],
         },
-        n_iter=100,
-        cv=5,
+        n_iter=50,
+        cv=2,
         verbose = 10,
         n_jobs = 2,
         n_points = 2,
@@ -78,7 +78,7 @@ for SEGMENTS_LENGTH in [3, 4]:
         random_state = 42
     )
 
-    checkpoint_callback = skopt.callbacks.CheckpointSaver(f'D:\\FINKI\\8_dps\\Project\\MODELS\\skopt_checkpoints\\{EXPERIMENT_ID}.pkl')
+    checkpoint_callback = skopt.callbacks.CheckpointSaver(f'D:\\FINKI\\8_dps\\Project\\MODELS\\afdb\\skopt_checkpoints\\{EXPERIMENT_ID}.pkl')
     hyperparameters_optimizer.fit(X_train, y_train, callback = [checkpoint_callback])
     skopt.dump(hyperparameters_optimizer, f'saved_models\\{EXPERIMENT_ID}.pkl')
 
